@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "AppStats": {
+      "title": "App Stats",
+      "description": "Historical performance data for a single app",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "platform": { "type": "string", "enum": ["ios", "android"] },
+        "category": { "type": "string" },
+        "revenue": { "type": "number" },
+        "downloads": { "type": "number" },
+        "dau": { "type": "number" },
+        "retention": { "type": "number" },
+        "lifecycleStage": { "type": "string", "enum": ["launch", "growth", "mature", "decline"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "platform", "revenue", "downloads", "timestamp"]
+    },
+    "CompetitorSet": {
+      "title": "Competitor Set",
+      "description": "A group of apps being compared by a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "appIds": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "appIds"]
+    },
+    "MarketInsight": {
+      "title": "Market Insight",
+      "description": "AI-generated insights for a market segment",
+      "type": "object",
+      "properties": {
+        "segment": { "type": "string" },
+        "insight": { "type": "string" },
+        "trend": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/apps/{appId}/history/{statId}": {
+      "schema": "AppStats",
+      "description": "Historical performance snapshots of an app"
+    },
+    "/apps/{appId}": {
+      "schema": "AppStats",
+      "description": "Current snapshot of an app"
+    },
+    "/competitorSets/{setId}": {
+      "schema": "CompetitorSet",
+      "description": "User-defined competitor comparison groups"
+    },
+    "/insights/{insightId}": {
+      "schema": "MarketInsight",
+      "description": "AI generated market analysis"
+    }
+  }
+}

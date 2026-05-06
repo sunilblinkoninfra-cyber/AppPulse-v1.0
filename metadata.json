@@ -1,0 +1,11 @@
+{
+  "name": "AppPulse",
+  "description": "Comprehensive mobile market intelligence platform for tracking app lifecycle, revenue, user engagement, and competitive trends across iOS and Android.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "Market Analysis",
+    "Competitive Intelligence",
+    "Revenue Tracking",
+    "AI Insights"
+  ]
+}

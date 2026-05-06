@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Apps (Public viewable, Admin-only write or System)
+    // For this app, we'll allow users to "track" apps, so metadata is public-ish
+    match /apps/{appId} {
+      allow get, list: if isSignedIn();
+      
+      function isValidApp(data) {
+        return data.name is string && data.name.size() <= 200 &&
+               data.platform in ['ios', 'android'] &&
+               data.revenue is number &&
+               data.downloads is number;
+      }
+
+      allow create: if isSignedIn() && isValidApp(request.resource.data);
+      allow update: if isSignedIn() && isValidApp(request.resource.data);
+
+      match /history/{statId} {
+        allow get, list: if isSignedIn();
+        allow create: if isSignedIn();
+      }
+    }
+
+    // Competitor Sets (Owner only)
+    match /competitorSets/{setId} {
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      
+      function isValidSet(data) {
+        return data.userId == request.auth.uid &&
+               data.name is string && data.name.size() <= 100 &&
+               data.appIds is list && data.appIds.size() <= 20;
+      }
+
+      allow create: if isSignedIn() && isValidSet(request.resource.data);
+      allow update: if isSignedIn() && isValidSet(request.resource.data) && 
+                      request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Insights (Public-ish summaries)
+    match /insights/{insightId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn(); // In a real app this would be backend only
+    }
+  }
+}
